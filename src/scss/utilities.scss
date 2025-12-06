@@ -1,0 +1,14 @@
+@use './globals' as *;
+
+.main-container {
+  margin: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: max-content 1fr;
+}
+
+.container {
+  max-width: rem(1600px);
+  margin: 0 auto;
+  padding: 20px;
+}

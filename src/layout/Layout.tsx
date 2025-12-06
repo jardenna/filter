@@ -4,12 +4,18 @@ import Nav from './nav/Nav';
 const Layout = () => (
   <div className="main-container">
     <header>
-      <div>Logo</div> <Nav />
+      <div className="container">
+        <div>Logo</div> <Nav />
+      </div>
     </header>
     <main>
-      <Outlet />
+      <div className="container">
+        <Outlet />
+      </div>
     </main>
-    <footer>Footer</footer>
+    <footer>
+      <div className="container">Footer</div>
+    </footer>
   </div>
 );
 
