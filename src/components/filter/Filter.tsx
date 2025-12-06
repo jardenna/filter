@@ -1,10 +1,18 @@
 import { ChangeEvent, useState } from 'react';
+import './_filter.scss';
+
+type Values = {
+  address: string;
+  name: string;
+};
 
 const Filter = () => {
-  const initialState = {
-    test: '',
+  const initialValues: Values = {
+    name: '',
+    address: '',
   };
-  const [values, setValues] = useState(initialState);
+
+  const [values, setValues] = useState(initialValues);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -13,10 +21,19 @@ const Filter = () => {
 
   return (
     <section>
-      <form>
+      <form className="filter">
         <div className="input-container">
-          <label htmlFor="test">Test</label>
-          <input type="text" id="test" name="test" onChange={handleChange} />
+          <label htmlFor="name">Name</label>
+          <input type="text" id="name" name="name" onChange={handleChange} />
+        </div>
+        <div className="input-container">
+          <label htmlFor="address">Address</label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            onChange={handleChange}
+          />
         </div>
       </form>
     </section>
