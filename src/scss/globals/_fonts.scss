@@ -1,0 +1,20 @@
+@font-face {
+  font-family: 'open_sansregular';
+  src:
+    url('/fonts/opensans-variablefont_wdthwght-webfont.woff2') format('woff2'),
+    url('/fonts/opensans-variablefont_wdthwght-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'poiret_oneregular';
+  src:
+    url('/fonts/poiretone-regular-webfont.woff2') format('woff2'),
+    url('/fonts/poiretone-regular-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+$font-primary: open_sansregular, sans-serif;
+$font-secondary: poiret_oneregular, sans-serif;

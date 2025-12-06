@@ -1,0 +1,42 @@
+@use './colors' as *;
+
+$animation-duration: 0.5s;
+$animation-timing-function: ease-in-out;
+
+@mixin max-size($width) {
+  @media screen and (max-width: $width) {
+    @content;
+  }
+}
+
+@mixin min-size($width) {
+  @media screen and (min-width: $width) {
+    @content;
+  }
+}
+
+@mixin transition($what: all, $time: 0.3s, $how: $animation-timing-function) {
+  & {
+    transition: $what $time $how;
+  }
+
+  @media (prefers-reduced-motion) {
+    transition: none;
+  }
+}
+
+@mixin animation(
+  $name,
+  $duration: $animation-duration,
+  $timing: $animation-timing-function
+) {
+  animation: $name $duration $timing forwards;
+
+  @media (prefers-reduced-motion) {
+    animation-name: none;
+  }
+}
+
+@mixin outline($color: $color-blue, $size: 2px) {
+  outline: $size solid $color;
+}

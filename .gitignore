@@ -1,0 +1,35 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+.DS_Store
+node_modules
+build
+dist
+*.local
+
+
+/keys
+
+request.rest
+.env
+.eslintcache
+en.json
+da.json
+
+# Editor directories and files
+
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+

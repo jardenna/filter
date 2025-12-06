@@ -1,0 +1,29 @@
+@use './globals' as *;
+
+* {
+  box-sizing: border-box;
+  font-family: $font-primary;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  font-size: rem(16px);
+}
+
+h1 {
+  font-size: rem(32px);
+}
+
+.main-container {
+  margin: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: max-content 1fr;
+}
