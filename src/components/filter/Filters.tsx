@@ -3,6 +3,12 @@ import useFilterParams from './useFilterParams';
 
 type FilterKey = 'category' | 'query';
 
+export const options = [
+  { value: 'apple', label: 'Apple' },
+  { value: 'banana', label: 'Banana' },
+  { value: 'orange', label: 'Orange' },
+];
+
 export default function Filters() {
   const [params, setParams] = useSearchParams();
 
