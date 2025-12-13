@@ -1,11 +1,11 @@
-import Filter from '../components/filter/Filter';
+import Filters from '../components/filter/Filters';
 
 const HomePage = () => (
   <section>
     <header>
       <h1>Home</h1>
     </header>
-    <Filter />
+    <Filters />
   </section>
 );
 
