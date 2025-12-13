@@ -28,23 +28,36 @@ export default function Filters() {
       return;
     }
 
-    const currentValues = next.getAll(name);
-
-    next.delete(name);
+    // checkbox handling: convert to single CSV param
+    const currentCSV = next.get(name) || '';
+    const currentValues = currentCSV
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean);
 
     const nextValues = checked
       ? [...currentValues, value]
       : currentValues.filter((v) => v !== value);
 
-    nextValues.forEach((v) => {
-      next.append(name, v);
-    });
+    if (nextValues.length === 0) {
+      next.delete(name);
+    } else {
+      next.set(name, nextValues.join(', '));
+    }
 
     setParams(next, { replace: true });
   }
 
   const filters = useFilterParams();
   console.log(filters);
+
+  // simple checkbox rendering without loops
+  const isChecked = (fruit: string) =>
+    params
+      .get('fruit')
+      ?.split(',')
+      .map((v) => v.trim())
+      .includes(fruit) || false;
 
   return (
     <form aria-label="Product filter">
@@ -61,18 +74,24 @@ export default function Filters() {
         <option value="men">Men</option>
         <option value="accessories">Accessories</option>
       </select>
-      {/* Fruit*/}
-      <div>
-        <input
-          type="checkbox"
-          id="fruit"
-          name="fruit"
-          value="apple"
-          checked={params.getAll('fruit').includes('apple')}
-          onChange={onChange}
-        />{' '}
-        <label htmlFor="fruit">apple</label>
-      </div>
+
+      {/* FRUITS */}
+      {options.map((option) => {
+        const id = `fruit-${option.value}`;
+        return (
+          <div key={option.value}>
+            <input
+              type="checkbox"
+              id={id}
+              name="fruit"
+              value={option.value}
+              checked={isChecked(option.value)}
+              onChange={onChange}
+            />
+            <label htmlFor={id}>{option.label}</label>
+          </div>
+        );
+      })}
 
       {/* TEXT SEARCH */}
       <label htmlFor="query-filter">Search</label>
