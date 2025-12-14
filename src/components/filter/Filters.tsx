@@ -6,6 +6,12 @@ export const options = [
   { value: 'orange', label: 'Orange' },
 ];
 
+export const columnOptions = [
+  { id: 'name', label: 'Name' },
+  { id: 'price', label: 'Price' },
+  { id: 'stock', label: 'Stock' },
+];
+
 export default function Filters() {
   const { params, filters, onChange } = useURLFilter();
   console.log(filters);
