@@ -12,6 +12,8 @@ export const columnOptions = [
   { id: 'stock', label: 'Stock' },
 ];
 
+const fruitsList = ['name', 'price', 'stock'];
+
 export default function Filters() {
   const { params, filters, onChange } = useURLFilter();
   console.log(filters);
@@ -33,7 +35,7 @@ export default function Filters() {
 
       <fieldset>
         <legend>Fruits</legend>
-        {['apple', 'banana', 'orange'].map((fruit) => (
+        {fruitsList.map((fruit) => (
           <div key={fruit}>
             <input
               type="checkbox"

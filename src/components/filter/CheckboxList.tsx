@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 interface CheckboxItem {
@@ -48,28 +48,41 @@ const CheckboxList: React.FC<Props> = ({ checkboxItems, defaultChecked }) => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     console.log('Checked items:', checkedItems);
   };
 
+  const handleReset = () => {
+    setCheckedItems(defaultChecked);
+  };
+
+  const disabled = checkedItems.length === 0;
+
   return (
-    <div className="checkbox-list">
-      {checkboxItems.map((item) => (
-        <label key={item.id}>
-          <input
-            type="checkbox"
-            checked={checkedItems.includes(item.id)}
-            onChange={() => {
-              handleChange(item.id);
-            }}
-          />
-          {item.label}
-        </label>
-      ))}
-      <button type="button" onClick={handleSubmit}>
-        Submit
-      </button>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <ul className="checkbox-list">
+        {checkboxItems.map((item) => (
+          <li key={item.id}>
+            <input
+              type="checkbox"
+              id={`column-${item.id}`}
+              checked={checkedItems.includes(item.id)}
+              onChange={() => {
+                handleChange(item.id);
+              }}
+            />
+            <label htmlFor={`column-${item.id}`}>{item.label}</label>
+          </li>
+        ))}
+        <button type="submit" className={disabled ? 'disabled' : ''}>
+          {disabled ? 'You must chose at least 1 column' : 'Submit'}
+        </button>
+        <button type="button" onClick={handleReset}>
+          Reset
+        </button>
+      </ul>
+    </form>
   );
 };
 
