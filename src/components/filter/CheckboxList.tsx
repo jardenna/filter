@@ -76,7 +76,7 @@ const CheckboxList: React.FC<Props> = ({ checkboxItems, defaultChecked }) => {
           </li>
         ))}
         <button type="submit" className={disabled ? 'disabled' : ''}>
-          {disabled ? 'You must chose at least 1 column' : 'Submit'}
+          {disabled ? 'Please choose at least 1 column' : 'Submit'}
         </button>
         <button type="button" onClick={handleReset}>
           Reset
