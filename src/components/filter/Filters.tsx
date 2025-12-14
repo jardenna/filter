@@ -1,6 +1,4 @@
-import { ChangeEvent } from 'react';
-import { useSearchParams } from 'react-router';
-import useFilterParams from './useFilterParams';
+import useURLFilter from './useURLFilter';
 
 export const options = [
   { value: 'apple', label: 'Apple' },
@@ -9,62 +7,14 @@ export const options = [
 ];
 
 export default function Filters() {
-  const [params, setParams] = useSearchParams();
-
-  function onChange(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const { name, value, type } = event.target;
-    const checked = (event.target as HTMLInputElement).checked;
-
-    const next = new URLSearchParams(params);
-
-    if (type !== 'checkbox') {
-      if (value === '') {
-        next.delete(name);
-      } else {
-        next.set(name, value);
-      }
-
-      setParams(next, { replace: true });
-      return;
-    }
-
-    // checkbox handling: convert to single CSV param
-    const currentCSV = next.get(name) || '';
-    const currentValues = currentCSV
-      .split(',')
-      .map((v) => v.trim())
-      .filter(Boolean);
-
-    const nextValues = checked
-      ? [...currentValues, value]
-      : currentValues.filter((v) => v !== value);
-
-    if (nextValues.length === 0) {
-      next.delete(name);
-    } else {
-      next.set(name, nextValues.join(', '));
-    }
-
-    setParams(next, { replace: true });
-  }
-
-  const filters = useFilterParams();
+  const { params, filters, onChange } = useURLFilter();
   console.log(filters);
-
-  // simple checkbox rendering without loops
-  const isChecked = (fruit: string) =>
-    params
-      .get('fruit')
-      ?.split(',')
-      .map((v) => v.trim())
-      .includes(fruit) || false;
 
   return (
     <form aria-label="Product filter">
-      {/* CATEGORY SELECT */}
-      <label htmlFor="category-filter">Category</label>
+      <label htmlFor="category">Category</label>
       <select
-        id="category-filter"
+        id="category"
         name="category"
         value={params.get('category') ?? ''}
         onChange={onChange}
@@ -75,28 +25,26 @@ export default function Filters() {
         <option value="accessories">Accessories</option>
       </select>
 
-      {/* FRUITS */}
-      {options.map((option) => {
-        const id = `fruit-${option.value}`;
-        return (
-          <div key={option.value}>
+      <fieldset>
+        <legend>Fruits</legend>
+        {['apple', 'banana', 'orange'].map((fruit) => (
+          <div key={fruit}>
             <input
               type="checkbox"
-              id={id}
+              id={`fruit-${fruit}`}
               name="fruit"
-              value={option.value}
-              checked={isChecked(option.value)}
+              value={fruit}
+              checked={params.getAll('fruit').includes(fruit)}
               onChange={onChange}
             />
-            <label htmlFor={id}>{option.label}</label>
+            <label htmlFor={`fruit-${fruit}`}>{fruit}</label>
           </div>
-        );
-      })}
+        ))}
+      </fieldset>
 
-      {/* TEXT SEARCH */}
-      <label htmlFor="query-filter">Search</label>
+      <label htmlFor="query">Search</label>
       <input
-        id="query-filter"
+        id="query"
         name="query"
         type="search"
         value={params.get('query') ?? ''}
