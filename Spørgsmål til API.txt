@@ -1,0 +1,19 @@
+Spørgsmål til API
+Er det de samme default columns alle brugere får? i så fald er det FE der skal håndtere gennem urlparams
+
+User clicks on link to table BE send initchecked columns [{id: orders, name: Orders}]
+User clicks on columns button a modal/ or the same panel as filters (Better) is displayed BE sends all possible options array with obj [{id: orders, name: 'Orders'}, {id: currency, name: 'Currency'}]
+User select/deselect options applied to url as params
+User clicks on apply selected options is send to BE which returns columns for selected options
+
+Hvis du vil have, at fravalg af defaultChecked også skal huskes, skal backend opdateres med brugerens valg, så defaultChecked kan ændres til noget nyt næste gang siden hentes.
+
+ok så det er noget jeg skal diskutere med Product owner
+
+Præcis, det er en beslutning, der ligger uden for frontend. Du skal afklare med Product Owner, om:
+
+DefaultChecked skal være “statisk” som backend sender det, og fravalg kun gælder under den aktuelle session (frontend/URL).
+
+Eller om fravalg af defaultChecked skal persistere, så backend gemmer brugerens valg, og næste load af siden reflekterer det nye sæt defaultChecked.
+
+Frontend kan kun vise og opdatere UI/URL; selve “persistensen” af ændringer på defaultChecked kræver backend-beslutning og API-support.

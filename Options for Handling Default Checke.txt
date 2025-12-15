@@ -1,0 +1,62 @@
+Options for Handling Default Checked Items from BE
+1. Keep defaultChecked + URL params (Current approach)
+
+Pros:
+
+Simple implementation.
+
+Users always see a pre-configured default state.
+
+Cons:
+
+Users cannot permanently uncheck defaults; they “come back” on refresh.
+
+URL params reflect only non-default items, so state isn’t fully shareable.
+
+2. Stateless via URL
+
+Pros:
+
+URL fully reflects user selections, including defaults.
+
+Refresh preserves exact user choices.
+
+Makes sharing/bookmarking links straightforward.
+
+Cons:
+
+Slightly more complex implementation.
+
+Defaults need to be added to URL initially to appear checked.
+
+3. Hybrid solution (Recommended for flexibility)
+
+Pros:
+
+Users see defaults on first load.
+
+URL then fully controls state for user-added items.
+
+Refresh preserves user choices for added items.
+
+Cons:
+
+Default items still revert on refresh if they’re meant to be user-uncheckable.
+
+Consequences
+
+Since defaults come from the backend and are the same for all users, unchecking them temporarily in the UI does not persist, unless backend is updated per user.
+
+Keeping defaults always checked simplifies frontend and backend logic.
+
+URL params can be used to track only additional user selections, avoiding unnecessary complexity.
+
+Recommendation
+
+Treat backend defaults as fixed starting points that cannot be permanently unchecked.
+
+Allow users to add extra items, which are tracked via URL params.
+
+This ensures predictable UX, simple implementation, and avoids unnecessary backend complexity.
+
+Submit actions and logging can still include all defaults plus user-added items.
