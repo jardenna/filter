@@ -1,21 +1,22 @@
-import CheckboxList from '../components/filter/CheckboxList';
+import SearchForm from '../components/SearchFilter';
 
-const checkboxItems = [
+export const checkboxItems = [
   { id: 'apple', label: 'Apple' },
   { id: 'banana', label: 'Banana' },
   { id: 'orange', label: 'Orange' },
 ];
-const defaultChecked = ['apple'];
+export const defaultChecked = ['apple'];
 
 const HomePage = () => (
   <section>
     <header>
       <h1>Home</h1>
     </header>
-    <CheckboxList
+    {/* <CheckboxList
       checkboxItems={checkboxItems}
       defaultChecked={defaultChecked}
-    />
+    /> */}
+    <SearchForm fields={['query', 'category', 'status', 'brand']} />
   </section>
 );
 
