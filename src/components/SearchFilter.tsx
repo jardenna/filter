@@ -7,24 +7,25 @@ function SearchForm({ fields }: { fields: string[] }) {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Læs værdier direkte fra form inputs
     const formData = new FormData(e.currentTarget);
-    const params = new URLSearchParams(searchParams);
 
-    const valuesArray: string[] = [];
+    // Lav array med udfyldte værdier
+    const valuesArray = fields
+      .map((field) => formData.get(field)?.toString().trim() || '')
+      .filter((value) => value !== '');
 
-    fields.forEach((field) => {
-      const value = formData.get(field)?.toString().trim() || '';
-      if (value) {
-        params.set(field, value); // opdater searchParams
-        valuesArray.push(value); // til array
-      } else {
-        params.delete(field); // fjern hvis tom
-      }
-    });
+    // Lav URLSearchParams uden push/forEach
+    const params = new URLSearchParams(
+      fields
+        .map((field) => {
+          const value = formData.get(field)?.toString().trim() || '';
+          return value ? [field, value] : null;
+        })
+        .filter(Boolean) as [string, string][], // Type assertion
+    );
 
     setSearchParams(params); // opdater URL
-    console.log(valuesArray); // her er dit array med udfyldte queries
+    console.log(valuesArray); // array med udfyldte queries
   };
 
   return (
@@ -35,7 +36,7 @@ function SearchForm({ fields }: { fields: string[] }) {
           <input
             id={field}
             name={field}
-            defaultValue={searchParams.get(field) || ''} // uncontrolled input
+            defaultValue={searchParams.get(field) || ''}
           />
         </div>
       ))}
