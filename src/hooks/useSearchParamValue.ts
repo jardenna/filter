@@ -14,7 +14,7 @@ const useSearchParamsValue = (fields: FieldConfig[]) => {
     fields.map(({ key, type }) => [
       key,
       type === 'checkbox'
-        ? searchParams.getAll(key) // return array instead of boolean
+        ? searchParams.getAll(key)
         : (searchParams.get(key) ?? ''),
     ]),
   );

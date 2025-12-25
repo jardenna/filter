@@ -30,13 +30,13 @@ const HomePage = () => {
         }}
       >
         <input
-          value={values.query as string}
+          value={values.query}
           onChange={(e) => {
             setValue('query', e.target.value);
           }}
         />
         <input
-          value={values.cat as string}
+          value={values.cat}
           onChange={(e) => {
             setValue('cat', e.target.value);
           }}
@@ -46,7 +46,7 @@ const HomePage = () => {
           <label key={item}>
             <input
               type="checkbox"
-              checked={(values.features as string[]).includes(item)}
+              checked={values.features.includes(item)}
               onChange={() => {
                 toggleValue('features', item);
               }}
