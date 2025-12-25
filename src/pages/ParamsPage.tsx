@@ -7,7 +7,6 @@ const ParamsPage = () => {
     features: ['apple'] as string[],
   });
 
-  // console.log({ values, setValue, toggleValue, clear });
   const checkboxItems = ['apple', 'banana', 'orange'];
 
   return (
