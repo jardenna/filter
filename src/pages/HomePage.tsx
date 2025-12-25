@@ -9,6 +9,18 @@ import useSearchParamsValue, {
 // ];
 // export const defaultChecked = ['apple'];
 
+// const initialFormValues = {
+//   price: '',
+//   phone: '',
+//   fullName: '',
+//   age: '',
+//   genderOption: 'woman',
+//   tickets: 1,
+//   selectedItems: ['option_1', 'option_3'],
+//   email: '',
+//   address: '',
+// };
+
 const HomePage = () => {
   const fields: FieldConfig[] = [
     { key: 'query', type: 'text' },
