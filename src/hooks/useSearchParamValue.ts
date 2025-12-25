@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useSearchParams } from 'react-router';
 
 type FieldType = 'text' | 'checkbox';
@@ -8,26 +7,31 @@ export type FieldConfig = {
   type: FieldType;
 };
 
-export const useSearchParamsValue = (fields: FieldConfig[]) => {
+const useSearchParamsValue = (fields: FieldConfig[]) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const values: Record<string, string | boolean> = {};
-  fields.forEach(({ key, type }) => {
-    values[key] =
+  const values = Object.fromEntries(
+    fields.map(({ key, type }) => [
+      key,
       type === 'checkbox'
         ? searchParams.has(key)
-        : (searchParams.get(key) ?? '');
-  });
+        : (searchParams.get(key) ?? ''),
+    ]),
+  );
+
+  const normalizeValue = (value: string | boolean) =>
+    typeof value === 'boolean' ? '1' : value;
 
   const setValue = (key: string, value: string | boolean) => {
     const next = new URLSearchParams(searchParams.toString());
 
-    if (typeof value === 'boolean') {
-      value ? next.set(key, '1') : next.delete(key);
-    } else {
-      value ? next.set(key, value) : next.delete(key);
+    if (!value) {
+      next.delete(key);
+      setSearchParams(next);
+      return;
     }
 
+    next.set(key, normalizeValue(value));
     setSearchParams(next);
   };
 
