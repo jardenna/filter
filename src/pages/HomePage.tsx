@@ -1,4 +1,6 @@
-import useSearchParamsValue from '../hooks/useSearchParamValue';
+import useSearchParamsValue, {
+  FieldConfig,
+} from '../hooks/useSearchParamValue';
 
 // export const checkboxItems = [
 //   { id: 'apple', label: 'Apple' },
@@ -8,7 +10,12 @@ import useSearchParamsValue from '../hooks/useSearchParamValue';
 // export const defaultChecked = ['apple'];
 
 const HomePage = () => {
-  const fields = ['query', 'category', 'status', 'brand', 'color'];
+  const fields: FieldConfig[] = [
+    { key: 'query', type: 'text' },
+    { key: 'category', type: 'text' },
+    { key: 'inStock', type: 'checkbox' },
+    { key: 'onSale', type: 'checkbox' },
+  ];
   const { values, setValue } = useSearchParamsValue(fields);
 
   return (
@@ -22,16 +29,29 @@ const HomePage = () => {
           console.log(values);
         }}
       >
-        {fields.map((key) => (
-          <input
-            key={key}
-            name={key}
-            value={values[key]}
-            onChange={(e) => {
-              setValue(key, e.target.value);
-            }}
-          />
-        ))}
+        {fields.map(({ key, type }) =>
+          type === 'checkbox' ? (
+            <label key={key}>
+              <input
+                type="checkbox"
+                checked={values[key] as boolean}
+                onChange={(e) => {
+                  setValue(key, e.target.checked);
+                }}
+              />
+              {key}
+            </label>
+          ) : (
+            <input
+              key={key}
+              value={values[key] as string}
+              onChange={(e) => {
+                setValue(key, e.target.value);
+              }}
+            />
+          ),
+        )}
+
         <button type="submit">Search</button>
       </form>
       {/* <CheckboxList
