@@ -14,28 +14,42 @@ const useSearchParamsValue = (fields: FieldConfig[]) => {
     fields.map(({ key, type }) => [
       key,
       type === 'checkbox'
-        ? searchParams.has(key)
+        ? searchParams.getAll(key) // return array instead of boolean
         : (searchParams.get(key) ?? ''),
     ]),
   );
 
-  const normalizeValue = (value: string | boolean) =>
-    typeof value === 'boolean' ? '1' : value;
+  const normalizeValue = (value: string) => value;
 
-  const setValue = (key: string, value: string | boolean) => {
+  const setValue = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams.toString());
-
-    if (!value) {
-      next.delete(key);
-      setSearchParams(next);
-      return;
-    }
-
-    next.set(key, normalizeValue(value));
+    next.delete(key);
+    next.append(key, normalizeValue(value));
     setSearchParams(next);
   };
 
-  return { values, setValue };
+  const toggleValue = (key: string, value: string) => {
+    const next = new URLSearchParams(searchParams.toString());
+    const current = next.getAll(key);
+
+    next.delete(key);
+
+    if (!current.includes(value)) {
+      [...current, value].forEach((v) => {
+        next.append(key, v);
+      });
+    } else {
+      current
+        .filter((v) => v !== value)
+        .forEach((v) => {
+          next.append(key, v);
+        });
+    }
+
+    setSearchParams(next);
+  };
+
+  return { values, setValue, toggleValue };
 };
 
 export default useSearchParamsValue;

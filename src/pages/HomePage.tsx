@@ -12,12 +12,12 @@ import useSearchParamsValue, {
 const HomePage = () => {
   const fields: FieldConfig[] = [
     { key: 'query', type: 'text' },
-    { key: 'category', type: 'text' },
-    { key: 'inStock', type: 'checkbox' },
-    { key: 'onSale', type: 'checkbox' },
+    { key: 'cat', type: 'text' },
+    { key: 'features', type: 'checkbox' },
   ];
-  const { values, setValue } = useSearchParamsValue(fields);
 
+  const { values, setValue, toggleValue } = useSearchParamsValue(fields);
+  const checkboxItems = ['apple', 'banana', 'orange'];
   return (
     <section>
       <header>
@@ -29,28 +29,31 @@ const HomePage = () => {
           console.log(values);
         }}
       >
-        {fields.map(({ key, type }) =>
-          type === 'checkbox' ? (
-            <label key={key}>
-              <input
-                type="checkbox"
-                checked={values[key] as boolean}
-                onChange={(e) => {
-                  setValue(key, e.target.checked);
-                }}
-              />
-              {key}
-            </label>
-          ) : (
+        <input
+          value={values.query as string}
+          onChange={(e) => {
+            setValue('query', e.target.value);
+          }}
+        />
+        <input
+          value={values.cat as string}
+          onChange={(e) => {
+            setValue('cat', e.target.value);
+          }}
+        />
+
+        {checkboxItems.map((item) => (
+          <label key={item}>
             <input
-              key={key}
-              value={values[key] as string}
-              onChange={(e) => {
-                setValue(key, e.target.value);
+              type="checkbox"
+              checked={(values.features as string[]).includes(item)}
+              onChange={() => {
+                toggleValue('features', item);
               }}
             />
-          ),
-        )}
+            {item}
+          </label>
+        ))}
 
         <button type="submit">Search</button>
       </form>
