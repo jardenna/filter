@@ -35,14 +35,14 @@ const useSearchParamsValue = (fields: FieldConfig[]) => {
     next.delete(key);
 
     if (!current.includes(value)) {
-      [...current, value].forEach((v) => {
-        next.append(key, v);
+      [...current, value].forEach((value) => {
+        next.append(key, value);
       });
     } else {
       current
-        .filter((v) => v !== value)
-        .forEach((v) => {
-          next.append(key, v);
+        .filter((value) => value !== value)
+        .forEach((value) => {
+          next.append(key, value);
         });
     }
 

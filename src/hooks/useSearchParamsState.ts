@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
 
 type SearchParamState = Record<string, string | string[]>;
@@ -7,26 +6,6 @@ const isArray = (value: unknown): value is string[] => Array.isArray(value);
 
 const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  useEffect(() => {
-    const next = new URLSearchParams(searchParams.toString());
-
-    Object.entries(defaults).forEach(([key, defaultValue]) => {
-      if (isArray(defaultValue)) {
-        if (next.getAll(key).length === 0) {
-          defaultValue.forEach((v) => {
-            next.append(key, v);
-          });
-        }
-      } else {
-        if (!next.has(key)) {
-          next.set(key, defaultValue);
-        }
-      }
-    });
-
-    setSearchParams(next, { replace: true });
-  }, []);
 
   const values = Object.fromEntries(
     Object.entries(defaults).map(([key, defaultValue]) => [
@@ -50,14 +29,14 @@ const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
     next.delete(key as string);
 
     if (!current.includes(value)) {
-      [...current, value].forEach((v) => {
-        next.append(key as string, v);
+      [...current, value].forEach((value) => {
+        next.append(key as string, value);
       });
     } else {
       current
-        .filter((v) => v !== value)
-        .forEach((v) => {
-          next.append(key as string, v);
+        .filter((value) => value !== value)
+        .forEach((value) => {
+          next.append(key as string, value);
         });
     }
 

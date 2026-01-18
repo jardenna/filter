@@ -11,21 +11,21 @@ const ParamsPage = () => {
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
+      onSubmit={(event) => {
+        event.preventDefault();
         console.log(values);
       }}
     >
       <input
         value={values.query}
-        onChange={(e) => {
-          setValue('query', e.target.value);
+        onChange={(event) => {
+          setValue('query', event.target.value);
         }}
       />
       <input
         value={values.cat}
-        onChange={(e) => {
-          setValue('cat', e.target.value);
+        onChange={(event) => {
+          setValue('cat', event.target.value);
         }}
       />
 
