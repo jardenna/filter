@@ -4,10 +4,14 @@ const ParamsPage = () => {
   const { values, setValue, toggleValue } = useSearchParamsState({
     query: '',
     cat: 'all',
-    features: ['apple'] as string[],
+    features: ['apple'],
   });
 
-  const checkboxItems = ['apple', 'banana', 'orange'];
+  const checkboxItems = [
+    { label: 'banana', value: 'banana' },
+    { label: 'orange', value: 'orange' },
+    { label: 'apple', value: 'apple' },
+  ];
 
   return (
     <form
@@ -29,17 +33,18 @@ const ParamsPage = () => {
         }}
       />
 
-      {checkboxItems.map((item) => (
-        <label key={item}>
+      {checkboxItems.map(({ label, value }) => (
+        <div key={value}>
           <input
+            id={value}
             type="checkbox"
-            checked={values.features.includes(item)}
+            checked={values.features.includes(value)}
             onChange={() => {
-              toggleValue('features', item);
+              toggleValue('features', value);
             }}
           />
-          {item}
-        </label>
+          <label htmlFor={value}>{label}</label>
+        </div>
       ))}
 
       <button type="submit">Search</button>
