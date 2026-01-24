@@ -16,9 +16,15 @@ const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
     ]),
   ) as T;
 
-  const setValue = (key: keyof T, value: string) => {
+  const setValue = (key: keyof T, value: string | string[]) => {
     const next = new URLSearchParams(searchParams.toString());
-    next.set(key as string, value);
+    next.delete(key as string);
+
+    const values = isArray(value) ? value : [value];
+    values.forEach((val) => {
+      next.append(key as string, val);
+    });
+
     setSearchParams(next);
   };
 
@@ -29,14 +35,14 @@ const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
     next.delete(key as string);
 
     if (!current.includes(value)) {
-      [...current, value].forEach((value) => {
-        next.append(key as string, value);
+      [...current, value].forEach((val) => {
+        next.append(key as string, val);
       });
     } else {
       current
-        .filter((value) => value !== value)
-        .forEach((value) => {
-          next.append(key as string, value);
+        .filter((val) => val !== value)
+        .forEach((val) => {
+          next.append(key as string, val);
         });
     }
 
