@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { type ChangeInputType } from '../../types';
 import './_filter.scss';
 
 interface PriceFilterProps {
@@ -11,6 +12,8 @@ interface PriceFilterProps {
   onMinChange: (value: string) => void;
 }
 
+type RangeKey = 'min' | 'max';
+
 const PriceFilter = ({
   minPrice,
   maxPrice,
@@ -20,114 +23,117 @@ const PriceFilter = ({
   max = 10000,
   debounceMs = 500,
 }: PriceFilterProps) => {
-  const [localMin, setLocalMin] = useState(minPrice);
-  const [localMax, setLocalMax] = useState(maxPrice);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [minValue, setMinValue] = useState(() => Number(minPrice || min));
+  const [maxValue, setMaxValue] = useState(() => Number(maxPrice || max));
 
-  useEffect(() => {
-    setLocalMin(minPrice);
-    setLocalMax(maxPrice);
-  }, [minPrice, maxPrice]);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const debounceUpdate = (updateFn: (value: string) => void, value: string) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+  const debounce = (fn: () => void) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
-    debounceTimerRef.current = setTimeout(() => {
-      updateFn(value);
-    }, debounceMs);
+    timerRef.current = setTimeout(fn, debounceMs);
   };
 
-  const handleSliderMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const numValue = Number(value);
-    if (numValue <= Number(localMax)) {
-      setLocalMin(value);
-      debounceUpdate(onMinChange, value);
+  const update = (key: RangeKey, raw: string) => {
+    const value = Number(raw);
+
+    if (!Number.isFinite(value)) {
+      return;
     }
+
+    if (key === 'min') {
+      if (value > maxValue) {
+        return;
+      }
+
+      setMinValue(value);
+      debounce(() => {
+        onMinChange(String(value));
+      });
+      return;
+    }
+
+    if (value < minValue) {
+      return;
+    }
+
+    setMaxValue(value);
+    debounce(() => {
+      onMaxChange(String(value));
+    });
   };
 
-  const handleSliderMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const numValue = Number(value);
-    if (numValue >= Number(localMin)) {
-      setLocalMax(value);
-      debounceUpdate(onMaxChange, value);
-    }
-  };
-
-  const handleInputMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocalMin(value);
-    if (value === '' || !isNaN(Number(value))) {
-      debounceUpdate(onMinChange, value);
-    }
-  };
-
-  const handleInputMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocalMax(value);
-    if (value === '' || !isNaN(Number(value))) {
-      debounceUpdate(onMaxChange, value);
-    }
-  };
+  const describedById = 'price-filter-current-range';
 
   return (
-    <div className="price-filter">
-      <h3>Pris</h3>
+    <fieldset className="price-filter" aria-describedby={describedById}>
+      <legend>Pris</legend>
 
       <div className="price-slider-container">
         <input
           type="range"
           min={min}
           max={max}
-          value={localMin || min}
-          onChange={handleSliderMinChange}
+          value={minValue}
+          onChange={(e) => {
+            update('min', e.target.value);
+          }}
           className="price-slider price-slider--min"
+          aria-label="Minimum pris"
         />
+
         <input
           type="range"
           min={min}
           max={max}
-          value={localMax || max}
-          onChange={handleSliderMaxChange}
+          value={maxValue}
+          onChange={(e) => {
+            update('max', e.target.value);
+          }}
           className="price-slider price-slider--max"
+          aria-label="Maksimum pris"
         />
       </div>
 
-      <div className="price-display">
-        <span>
-          {localMin || min} kr - {localMax || max} kr
-        </span>
-      </div>
+      <output id={describedById} className="price-display" aria-live="polite">
+        {minValue} kr - {maxValue} kr
+      </output>
 
       <div className="price-inputs">
         <div className="price-input-group">
           <label htmlFor="minPrice">Min pris</label>
           <input
             id="minPrice"
+            name="minPrice"
             type="number"
-            value={localMin}
-            onChange={handleInputMinChange}
-            placeholder="0"
+            value={minValue}
+            onChange={(event: ChangeInputType) => {
+              update('min', event.target.value);
+            }}
             min={min}
             max={max}
+            inputMode="numeric"
           />
         </div>
+
         <div className="price-input-group">
           <label htmlFor="maxPrice">Max pris</label>
           <input
             id="maxPrice"
+            name="maxPrice"
             type="number"
-            value={localMax}
-            onChange={handleInputMaxChange}
-            placeholder={max.toString()}
+            value={maxValue}
+            onChange={(event: ChangeInputType) => {
+              update('max', event.target.value);
+            }}
             min={min}
             max={max}
+            inputMode="numeric"
           />
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 };
 
