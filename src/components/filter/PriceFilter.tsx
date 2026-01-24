@@ -77,6 +77,7 @@ const PriceFilter = ({
           }}
         />
 
+        {/* Sliders med forbedret A11y */}
         <input
           type="range"
           name="min"
@@ -86,7 +87,7 @@ const PriceFilter = ({
           step={step}
           value={minValue}
           onChange={handlePriceChange}
-          className="price-slider price-slider--min"
+          className="price-slider"
           aria-label="Minimum pris"
           aria-valuemin={min}
           aria-valuemax={max}
@@ -103,7 +104,7 @@ const PriceFilter = ({
           step={step}
           value={maxValue}
           onChange={handlePriceChange}
-          className="price-slider price-slider--max"
+          className="price-slider"
           aria-label="Maksimum pris"
           aria-valuemin={min}
           aria-valuemax={max}
