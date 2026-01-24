@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
+import useDebounce from '../../hooks/useDebounce';
 import { type ChangeInputType } from '../../types';
 import './_filter.scss';
 
@@ -19,21 +20,11 @@ const PriceFilter = ({
   onMaxChange,
   min = 0,
   max = 10000,
-  debounceMs = 500,
 }: PriceFilterProps) => {
   const [minValue, setMinValue] = useState(() => Number(minPrice || min));
   const [maxValue, setMaxValue] = useState(() => Number(maxPrice || max));
-
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const debounce = (callback: () => void) => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    timerRef.current = setTimeout(callback, debounceMs);
-  };
-
-  const update = (event: ChangeInputType) => {
+  const { debounce } = useDebounce();
+  const handlePriceChange = (event: ChangeInputType) => {
     const { name, value } = event.target;
 
     if (name !== 'min' && name !== 'max') {
@@ -82,7 +73,7 @@ const PriceFilter = ({
           min={min}
           max={max}
           value={minValue}
-          onChange={update}
+          onChange={handlePriceChange}
           className="price-slider price-slider--min"
           aria-label="Minimum pris"
         />
@@ -94,7 +85,7 @@ const PriceFilter = ({
           min={min}
           max={max}
           value={maxValue}
-          onChange={update}
+          onChange={handlePriceChange}
           className="price-slider price-slider--max"
           aria-label="Maksimum pris"
         />
@@ -112,7 +103,7 @@ const PriceFilter = ({
             name="min"
             type="number"
             value={minValue}
-            onChange={update}
+            onChange={handlePriceChange}
             min={min}
             max={max}
             inputMode="numeric"
@@ -126,7 +117,7 @@ const PriceFilter = ({
             name="max"
             type="number"
             value={maxValue}
-            onChange={update}
+            onChange={handlePriceChange}
             min={min}
             max={max}
             inputMode="numeric"
