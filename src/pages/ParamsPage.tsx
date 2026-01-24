@@ -26,12 +26,16 @@ const ParamsPage = () => {
           setValue('query', event.target.value);
         }}
       />
-      <input
+      <select
         value={values.cat}
         onChange={(event) => {
           setValue('cat', event.target.value);
         }}
-      />
+      >
+        <option value="all">All</option>
+        <option value="fruit">Fruit</option>
+        <option value="vegetable">Vegetable</option>
+      </select>
 
       {checkboxItems.map(({ label, value }) => (
         <div key={value}>
