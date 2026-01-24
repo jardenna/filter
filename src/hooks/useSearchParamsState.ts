@@ -7,47 +7,52 @@ const isArray = (value: unknown): value is string[] => Array.isArray(value);
 const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const getParamValue = (key: string, defaultValue: string | string[]) => {
+    if (isArray(defaultValue)) {
+      const allValues = searchParams.getAll(key);
+      return allValues.length > 0 ? allValues : defaultValue;
+    }
+    return searchParams.get(key) ?? defaultValue;
+  };
+
   const values = Object.fromEntries(
-    Object.entries(defaults).map(([key, defaultValue]) => {
-      if (isArray(defaultValue)) {
-        const allValues = searchParams.getAll(key);
-        return [key, allValues.length > 0 ? allValues : defaultValue];
-      }
-      return [key, searchParams.get(key) ?? defaultValue];
-    }),
+    Object.entries(defaults).map(([key, defaultValue]) => [
+      key,
+      getParamValue(key, defaultValue),
+    ]),
   ) as T;
 
   const setValue = (key: keyof T, value: string | string[]) => {
-    const next = new URLSearchParams(searchParams.toString());
-    next.delete(key as string);
+    const updatedSearchParams = new URLSearchParams(searchParams.toString());
+    updatedSearchParams.delete(key as string);
 
     const values = isArray(value) ? value : [value];
     values.forEach((val) => {
-      next.append(key as string, val);
+      updatedSearchParams.append(key as string, val);
     });
 
-    setSearchParams(next);
+    setSearchParams(updatedSearchParams);
   };
 
   const toggleValue = (key: keyof T, value: string) => {
-    const next = new URLSearchParams(searchParams.toString());
+    const updatedSearchParams = new URLSearchParams(searchParams.toString());
     const current = values[key] as string[];
 
-    next.delete(key as string);
+    updatedSearchParams.delete(key as string);
 
     if (!current.includes(value)) {
       [...current, value].forEach((val) => {
-        next.append(key as string, val);
+        updatedSearchParams.append(key as string, val);
       });
     } else {
       current
         .filter((val) => val !== value)
         .forEach((val) => {
-          next.append(key as string, val);
+          updatedSearchParams.append(key as string, val);
         });
     }
 
-    setSearchParams(next);
+    setSearchParams(updatedSearchParams);
   };
 
   return { values, setValue, toggleValue };
