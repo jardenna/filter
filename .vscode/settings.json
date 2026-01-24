@@ -1,21 +1,27 @@
 {
   "eslint.useFlatConfig": true,
-  "prettier.trailingComma": "all",
+  "prettier.configPath": ".prettierrc",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "files.eol": "\n",
+  "editor.formatOnSaveMode": "file",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+
   "editor.codeActionsOnSave": {
     "source.organizeImports": "always",
     "source.addMissingImports": "always",
-    "source.fixAll": "always"
+    "source.fixAll.eslint": "always",
+    "source.fixAll.stylelint": "always"
   },
 
-  // Emmet + snippet behavior fix
-  "emmet.showSuggestionsAsSnippets": false,
-  "editor.tabCompletion": "onlySnippets",
-  "emmet.triggerExpansionOnTab": true,
-  "emmet.includeLanguages": {
-    "javascript": "javascriptreact",
-    "typescript": "typescriptreact"
-  }
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.format.enable": false,
+
+  "stylelint.validate": ["css", "scss"]
 }
