@@ -55,6 +55,7 @@ const ParamsPage = () => {
       ))}
 
       <PriceFilter
+        key={`${values.minPrice}-${values.maxPrice}`}
         minPrice={values.minPrice}
         maxPrice={values.maxPrice}
         onMinChange={(value) => {
