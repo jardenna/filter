@@ -24,35 +24,29 @@ const PriceFilter = ({
   const [minValue, setMinValue] = useState(() => Number(minPrice || min));
   const [maxValue, setMaxValue] = useState(() => Number(maxPrice || max));
   const { debounce } = useDebounce();
+
   const handlePriceChange = (event: ChangeInputType) => {
     const { name, value } = event.target;
-
     if (name !== 'min' && name !== 'max') {
       return;
     }
-
     const numericValue = Number(value);
-
     if (!Number.isFinite(numericValue)) {
       return;
     }
-
     if (name === 'min') {
       if (numericValue > maxValue) {
         return;
       }
-
       setMinValue(numericValue);
       debounce(() => {
         onMinChange(String(numericValue));
       });
       return;
     }
-
     if (numericValue < minValue) {
       return;
     }
-
     setMaxValue(numericValue);
     debounce(() => {
       onMaxChange(String(numericValue));
@@ -61,11 +55,27 @@ const PriceFilter = ({
 
   const describedById = 'price-filter-current-range';
 
+  // Calculate filled track position and width
+  const leftPercent = ((minValue - min) / (max - min)) * 100;
+  const widthPercent = ((maxValue - minValue) / (max - min)) * 100;
+
   return (
     <fieldset className="price-filter" aria-describedby={describedById}>
       <legend>Pris</legend>
-
       <div className="price-slider-container">
+        {/* Background track */}
+        <div className="slider-track-bg" />
+
+        {/* Filled track */}
+        <div
+          className="slider-track-filled"
+          style={{
+            left: `${leftPercent}%`,
+            width: `${widthPercent}%`,
+          }}
+        />
+
+        {/* Sliders */}
         <input
           type="range"
           name="min"
@@ -77,7 +87,6 @@ const PriceFilter = ({
           className="price-slider price-slider--min"
           aria-label="Minimum pris"
         />
-
         <input
           type="range"
           name="max"
@@ -90,11 +99,9 @@ const PriceFilter = ({
           aria-label="Maksimum pris"
         />
       </div>
-
       <output id={describedById} className="price-display" aria-live="polite">
         {minValue} kr - {maxValue} kr
       </output>
-
       <div className="price-inputs">
         <div className="price-input-group">
           <label htmlFor="minPrice">Min pris</label>
@@ -109,7 +116,6 @@ const PriceFilter = ({
             inputMode="numeric"
           />
         </div>
-
         <div className="price-input-group">
           <label htmlFor="maxPrice">Max pris</label>
           <input
