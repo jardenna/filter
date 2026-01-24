@@ -75,6 +75,7 @@ export default defineConfig(
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-invalid-void-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-confusing-void-expression': 'error',
       '@typescript-eslint/no-duplicate-enum-values': 'warn',
       '@typescript-eslint/no-empty-interface': 'warn',
       '@typescript-eslint/no-floating-promises': 'off',
