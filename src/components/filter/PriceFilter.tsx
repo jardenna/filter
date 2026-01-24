@@ -35,32 +35,32 @@ const PriceFilter = ({
     timerRef.current = setTimeout(fn, debounceMs);
   };
 
-  const update = (key: RangeKey, raw: string) => {
-    const value = Number(raw);
+  const update = (name: RangeKey, value: string) => {
+    const numericValue = Number(value);
 
-    if (!Number.isFinite(value)) {
+    if (!Number.isFinite(numericValue)) {
       return;
     }
 
-    if (key === 'min') {
-      if (value > maxValue) {
+    if (name === 'min') {
+      if (numericValue > maxValue) {
         return;
       }
 
-      setMinValue(value);
+      setMinValue(numericValue);
       debounce(() => {
-        onMinChange(String(value));
+        onMinChange(String(numericValue));
       });
       return;
     }
 
-    if (value < minValue) {
+    if (numericValue < minValue) {
       return;
     }
 
-    setMaxValue(value);
+    setMaxValue(numericValue);
     debounce(() => {
-      onMaxChange(String(value));
+      onMaxChange(String(numericValue));
     });
   };
 
