@@ -8,12 +8,13 @@ const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const values = Object.fromEntries(
-    Object.entries(defaults).map(([key, defaultValue]) => [
-      key,
-      isArray(defaultValue)
-        ? searchParams.getAll(key)
-        : (searchParams.get(key) ?? defaultValue),
-    ]),
+    Object.entries(defaults).map(([key, defaultValue]) => {
+      if (isArray(defaultValue)) {
+        const allValues = searchParams.getAll(key);
+        return [key, allValues.length > 0 ? allValues : defaultValue];
+      }
+      return [key, searchParams.get(key) ?? defaultValue];
+    }),
   ) as T;
 
   const setValue = (key: keyof T, value: string | string[]) => {
@@ -30,7 +31,7 @@ const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
 
   const toggleValue = (key: keyof T, value: string) => {
     const next = new URLSearchParams(searchParams.toString());
-    const current = next.getAll(key as string);
+    const current = values[key] as string[];
 
     next.delete(key as string);
 
