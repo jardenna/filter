@@ -16,6 +16,9 @@ export default defineConfig(
         projectService: true,
         ecmaVersion: 'latest',
         sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
         globals: {
           process: 'readonly',
           console: 'readonly',
@@ -75,6 +78,7 @@ export default defineConfig(
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-invalid-void-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-confusing-void-expression': 'error',
       '@typescript-eslint/no-duplicate-enum-values': 'warn',
       '@typescript-eslint/no-empty-interface': 'warn',
       '@typescript-eslint/no-floating-promises': 'off',
@@ -187,7 +191,6 @@ export default defineConfig(
       'jsx-a11y/heading-has-content': ['error'],
       'jsx-a11y/no-distracting-elements': ['error'],
       'jsx-a11y/no-interactive-element-to-noninteractive-role': ['error'],
-      'jsx-a11y/html-has-lang': ['error'],
       'jsx-a11y/no-noninteractive-tabindex': ['error'],
       'jsx-a11y/role-has-required-aria-props': ['error'],
       'jsx-a11y/no-redundant-roles': ['error'],

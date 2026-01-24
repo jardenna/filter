@@ -1,3 +1,4 @@
+import PriceFilter from '../components/filter/PriceFilter';
 import useSearchParamsState from '../hooks/useSearchParamsState';
 
 const ParamsPage = () => {
@@ -5,6 +6,8 @@ const ParamsPage = () => {
     query: '',
     cat: 'all',
     features: ['apple'],
+    minPrice: '',
+    maxPrice: '',
   });
 
   const checkboxItems = [
@@ -50,6 +53,19 @@ const ParamsPage = () => {
           <label htmlFor={value}>{label}</label>
         </div>
       ))}
+
+      <PriceFilter
+        minPrice={values.minPrice}
+        maxPrice={values.maxPrice}
+        onMinChange={(value) => {
+          setValue('minPrice', value);
+        }}
+        onMaxChange={(value) => {
+          setValue('maxPrice', value);
+        }}
+        min={0}
+        max={10000}
+      />
 
       <button type="submit">Search</button>
     </form>
