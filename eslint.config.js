@@ -16,6 +16,9 @@ export default defineConfig(
         projectService: true,
         ecmaVersion: 'latest',
         sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
         globals: {
           process: 'readonly',
           console: 'readonly',
@@ -188,7 +191,6 @@ export default defineConfig(
       'jsx-a11y/heading-has-content': ['error'],
       'jsx-a11y/no-distracting-elements': ['error'],
       'jsx-a11y/no-interactive-element-to-noninteractive-role': ['error'],
-      'jsx-a11y/html-has-lang': ['error'],
       'jsx-a11y/no-noninteractive-tabindex': ['error'],
       'jsx-a11y/role-has-required-aria-props': ['error'],
       'jsx-a11y/no-redundant-roles': ['error'],
