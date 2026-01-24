@@ -59,6 +59,8 @@ const PriceFilter = ({
   const leftPercent = ((minValue - min) / (max - min)) * 100;
   const widthPercent = ((maxValue - minValue) / (max - min)) * 100;
 
+  const step = 100;
+
   return (
     <fieldset className="price-filter" aria-describedby={describedById}>
       <legend>Pris</legend>
@@ -75,17 +77,22 @@ const PriceFilter = ({
           }}
         />
 
-        {/* Sliders */}
         <input
           type="range"
           name="min"
           id="min"
           min={min}
           max={max}
+          step={step}
           value={minValue}
           onChange={handlePriceChange}
           className="price-slider price-slider--min"
           aria-label="Minimum pris"
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={minValue}
+          aria-valuetext={`${minValue} kroner`}
+          tabIndex={0}
         />
         <input
           type="range"
@@ -93,10 +100,16 @@ const PriceFilter = ({
           id="max"
           min={min}
           max={max}
+          step={step}
           value={maxValue}
           onChange={handlePriceChange}
           className="price-slider price-slider--max"
           aria-label="Maksimum pris"
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={maxValue}
+          aria-valuetext={`${maxValue} kroner`}
+          tabIndex={0}
         />
       </div>
       <output id={describedById} className="price-display" aria-live="polite">
@@ -113,6 +126,7 @@ const PriceFilter = ({
             onChange={handlePriceChange}
             min={min}
             max={max}
+            step={step}
             inputMode="numeric"
           />
         </div>
@@ -126,6 +140,7 @@ const PriceFilter = ({
             onChange={handlePriceChange}
             min={min}
             max={max}
+            step={step}
             inputMode="numeric"
           />
         </div>

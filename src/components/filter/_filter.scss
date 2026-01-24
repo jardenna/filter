@@ -77,6 +77,22 @@
   transition: all 0.2s ease;
 }
 
+.price-slider:focus {
+  outline: none;
+}
+
+.price-slider:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid #007bff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgb(0 123 255 / 25%);
+}
+
+.price-slider:focus-visible::-moz-range-thumb {
+  outline: 3px solid #007bff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgb(0 123 255 / 25%);
+}
+
 /* Hover */
 .price-slider::-webkit-slider-thumb:hover {
   background: #f8f9fa;
