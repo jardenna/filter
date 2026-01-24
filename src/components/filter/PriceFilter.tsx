@@ -12,8 +12,6 @@ interface PriceFilterProps {
   onMinChange: (value: string) => void;
 }
 
-type RangeKey = 'min' | 'max';
-
 const PriceFilter = ({
   minPrice,
   maxPrice,
@@ -28,14 +26,20 @@ const PriceFilter = ({
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const debounce = (fn: () => void) => {
+  const debounce = (callback: () => void) => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
-    timerRef.current = setTimeout(fn, debounceMs);
+    timerRef.current = setTimeout(callback, debounceMs);
   };
 
-  const update = (name: RangeKey, value: string) => {
+  const update = (event: ChangeInputType) => {
+    const { name, value } = event.target;
+
+    if (name !== 'min' && name !== 'max') {
+      return;
+    }
+
     const numericValue = Number(value);
 
     if (!Number.isFinite(numericValue)) {
@@ -73,24 +77,24 @@ const PriceFilter = ({
       <div className="price-slider-container">
         <input
           type="range"
+          name="min"
+          id="min"
           min={min}
           max={max}
           value={minValue}
-          onChange={(e) => {
-            update('min', e.target.value);
-          }}
+          onChange={update}
           className="price-slider price-slider--min"
           aria-label="Minimum pris"
         />
 
         <input
           type="range"
+          name="max"
+          id="max"
           min={min}
           max={max}
           value={maxValue}
-          onChange={(e) => {
-            update('max', e.target.value);
-          }}
+          onChange={update}
           className="price-slider price-slider--max"
           aria-label="Maksimum pris"
         />
@@ -105,12 +109,10 @@ const PriceFilter = ({
           <label htmlFor="minPrice">Min pris</label>
           <input
             id="minPrice"
-            name="minPrice"
+            name="min"
             type="number"
             value={minValue}
-            onChange={(event: ChangeInputType) => {
-              update('min', event.target.value);
-            }}
+            onChange={update}
             min={min}
             max={max}
             inputMode="numeric"
@@ -121,12 +123,10 @@ const PriceFilter = ({
           <label htmlFor="maxPrice">Max pris</label>
           <input
             id="maxPrice"
-            name="maxPrice"
+            name="max"
             type="number"
             value={maxValue}
-            onChange={(event: ChangeInputType) => {
-              update('max', event.target.value);
-            }}
+            onChange={update}
             min={min}
             max={max}
             inputMode="numeric"
