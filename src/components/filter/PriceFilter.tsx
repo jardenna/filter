@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './_filter.scss';
 
 interface PriceFilterProps {
   maxPrice: string;
   minPrice: string;
+  debounceMs?: number;
   max?: number;
   min?: number;
   onMaxChange: (value: string) => void;
@@ -17,21 +18,32 @@ const PriceFilter = ({
   onMaxChange,
   min = 0,
   max = 10000,
+  debounceMs = 500,
 }: PriceFilterProps) => {
   const [localMin, setLocalMin] = useState(minPrice);
   const [localMax, setLocalMax] = useState(maxPrice);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setLocalMin(minPrice);
     setLocalMax(maxPrice);
   }, [minPrice, maxPrice]);
 
+  const debounceUpdate = (updateFn: (value: string) => void, value: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      updateFn(value);
+    }, debounceMs);
+  };
+
   const handleSliderMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const numValue = Number(value);
     if (numValue <= Number(localMax)) {
       setLocalMin(value);
-      onMinChange(value);
+      debounceUpdate(onMinChange, value);
     }
   };
 
@@ -40,7 +52,7 @@ const PriceFilter = ({
     const numValue = Number(value);
     if (numValue >= Number(localMin)) {
       setLocalMax(value);
-      onMaxChange(value);
+      debounceUpdate(onMaxChange, value);
     }
   };
 
@@ -48,7 +60,7 @@ const PriceFilter = ({
     const value = e.target.value;
     setLocalMin(value);
     if (value === '' || !isNaN(Number(value))) {
-      onMinChange(value);
+      debounceUpdate(onMinChange, value);
     }
   };
 
@@ -56,7 +68,7 @@ const PriceFilter = ({
     const value = e.target.value;
     setLocalMax(value);
     if (value === '' || !isNaN(Number(value))) {
-      onMaxChange(value);
+      debounceUpdate(onMaxChange, value);
     }
   };
 
