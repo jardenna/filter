@@ -9,6 +9,7 @@ interface PriceFilterProps {
   debounceMs?: number;
   max?: number;
   min?: number;
+  step?: number;
   onMaxChange: (value: string) => void;
   onMinChange: (value: string) => void;
 }
@@ -18,6 +19,7 @@ const PriceFilter = ({
   maxPrice,
   onMinChange,
   onMaxChange,
+  step = 100,
   min = 0,
   max = 10000,
 }: PriceFilterProps) => {
@@ -59,8 +61,6 @@ const PriceFilter = ({
   const leftPercent = ((minValue - min) / (max - min)) * 100;
   const widthPercent = ((maxValue - minValue) / (max - min)) * 100;
 
-  const step = 100;
-
   return (
     <fieldset className="price-filter" aria-describedby={describedById}>
       <legend>Pris</legend>
@@ -77,7 +77,6 @@ const PriceFilter = ({
           }}
         />
 
-        {/* Sliders med forbedret A11y */}
         <input
           type="range"
           name="min"
