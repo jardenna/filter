@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import useDebounce from '../../hooks/useDebounce';
-import { type ChangeInputType } from '../../types';
 import './_filter.scss';
 
 interface PriceFilterProps {
@@ -14,6 +13,21 @@ interface PriceFilterProps {
   onMinChange: (value: string) => void;
 }
 
+const clampNumberToRange = (
+  value: number,
+  lowerBound: number,
+  upperBound: number,
+) => Math.min(upperBound, Math.max(lowerBound, value));
+
+const parseFiniteNumberOrNull = (rawValue: string) => {
+  if (rawValue.trim() === '') {
+    return null;
+  }
+
+  const parsedValue = Number(rawValue);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+};
+
 const PriceFilter = ({
   minPrice,
   maxPrice,
@@ -23,52 +37,102 @@ const PriceFilter = ({
   min = 0,
   max = 10000,
 }: PriceFilterProps) => {
-  const [minValue, setMinValue] = useState(() => Number(minPrice || min));
-  const [maxValue, setMaxValue] = useState(() => Number(maxPrice || max));
+  const describedById = useId();
   const { debounce } = useDebounce();
 
-  const handlePriceChange = (event: ChangeInputType) => {
-    const { name, value } = event.target;
-    if (name !== 'min' && name !== 'max') {
+  // Canonical numeric values (used by range inputs + output)
+  const [minimumValue, setMinimumValue] = useState(() =>
+    clampNumberToRange(Number(minPrice || min), min, max),
+  );
+  const [maximumValue, setMaximumValue] = useState(() =>
+    clampNumberToRange(Number(maxPrice || max), min, max),
+  );
+
+  // Draft values for typing (used by number inputs)
+  const [minimumDraft, setMinimumDraft] = useState(() =>
+    String(clampNumberToRange(Number(minPrice || min), min, max)),
+  );
+  const [maximumDraft, setMaximumDraft] = useState(() =>
+    String(clampNumberToRange(Number(maxPrice || max), min, max)),
+  );
+
+  const commitMinimumValue = (rawValue: string) => {
+    const parsedValue = parseFiniteNumberOrNull(rawValue);
+
+    if (parsedValue === null) {
+      setMinimumDraft(String(minimumValue));
       return;
     }
-    const numericValue = Number(value);
-    if (!Number.isFinite(numericValue)) {
-      return;
-    }
-    if (name === 'min') {
-      if (numericValue > maxValue) {
-        return;
-      }
-      setMinValue(numericValue);
-      debounce(() => {
-        onMinChange(String(numericValue));
-      });
-      return;
-    }
-    if (numericValue < minValue) {
-      return;
-    }
-    setMaxValue(numericValue);
+
+    const committedValue = clampNumberToRange(parsedValue, min, maximumValue);
+
+    setMinimumValue(committedValue);
+    setMinimumDraft(String(committedValue));
+
     debounce(() => {
-      onMaxChange(String(numericValue));
+      onMinChange(String(committedValue));
     });
   };
 
-  const describedById = 'price-filter-current-range';
+  const commitMaximumValue = (rawValue: string) => {
+    const parsedValue = parseFiniteNumberOrNull(rawValue);
 
-  // Calculate filled track position and width
-  const leftPercent = ((minValue - min) / (max - min)) * 100;
-  const widthPercent = ((maxValue - minValue) / (max - min)) * 100;
+    if (parsedValue === null) {
+      setMaximumDraft(String(maximumValue));
+      return;
+    }
+
+    const committedValue = clampNumberToRange(parsedValue, minimumValue, max);
+
+    setMaximumValue(committedValue);
+    setMaximumDraft(String(committedValue));
+
+    debounce(() => {
+      onMaxChange(String(committedValue));
+    });
+  };
+
+  const handleRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputName = event.target.name;
+    const inputValue = Number(event.target.value);
+
+    if (!Number.isFinite(inputValue)) {
+      return;
+    }
+
+    if (inputName === 'min') {
+      const committedValue = clampNumberToRange(inputValue, min, maximumValue);
+
+      setMinimumValue(committedValue);
+      setMinimumDraft(String(committedValue));
+
+      debounce(() => {
+        onMinChange(String(committedValue));
+      });
+      return;
+    }
+
+    if (inputName === 'max') {
+      const committedValue = clampNumberToRange(inputValue, minimumValue, max);
+
+      setMaximumValue(committedValue);
+      setMaximumDraft(String(committedValue));
+
+      debounce(() => {
+        onMaxChange(String(committedValue));
+      });
+    }
+  };
+
+  const leftPercent = ((minimumValue - min) / (max - min)) * 100;
+  const widthPercent = ((maximumValue - minimumValue) / (max - min)) * 100;
 
   return (
     <fieldset className="price-filter" aria-describedby={describedById}>
       <legend>Pris</legend>
-      <div className="price-slider-container">
-        {/* Background track */}
-        <div className="slider-track-bg" />
 
-        {/* Filled track */}
+      <div className="price-slider-container">
+        <div className="slider-track-bg" />
         <div
           className="slider-track-filled"
           style={{
@@ -84,16 +148,16 @@ const PriceFilter = ({
           min={min}
           max={max}
           step={step}
-          value={minValue}
-          onChange={handlePriceChange}
+          value={minimumValue}
+          onChange={handleRangeChange}
           className="price-slider"
           aria-label="Minimum pris"
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuenow={minValue}
-          aria-valuetext={`${minValue} kroner`}
-          tabIndex={0}
+          aria-valuenow={minimumValue}
+          aria-valuetext={`${minimumValue} kroner`}
         />
+
         <input
           type="range"
           name="max"
@@ -101,47 +165,71 @@ const PriceFilter = ({
           min={min}
           max={max}
           step={step}
-          value={maxValue}
-          onChange={handlePriceChange}
+          value={maximumValue}
+          onChange={handleRangeChange}
           className="price-slider"
           aria-label="Maksimum pris"
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuenow={maxValue}
-          aria-valuetext={`${maxValue} kroner`}
-          tabIndex={0}
+          aria-valuenow={maximumValue}
+          aria-valuetext={`${maximumValue} kroner`}
         />
       </div>
+
       <output id={describedById} className="price-display" aria-live="polite">
-        {minValue} kr - {maxValue} kr
+        {minimumValue} kr - {maximumValue} kr
       </output>
+
       <div className="price-inputs">
         <div className="price-input-group">
           <label htmlFor="minPrice">Min pris</label>
           <input
             id="minPrice"
-            name="min"
+            name="minPrice"
             type="number"
-            value={minValue}
-            onChange={handlePriceChange}
+            value={minimumDraft}
             min={min}
             max={max}
             step={step}
             inputMode="numeric"
+            onChange={(event) => {
+              setMinimumDraft(event.target.value);
+            }}
+            onBlur={() => {
+              commitMinimumValue(minimumDraft);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                commitMinimumValue(minimumDraft);
+              }
+            }}
+            aria-label="Indtast minimum pris"
           />
         </div>
+
         <div className="price-input-group">
           <label htmlFor="maxPrice">Max pris</label>
           <input
             id="maxPrice"
-            name="max"
+            name="maxPrice"
             type="number"
-            value={maxValue}
-            onChange={handlePriceChange}
+            value={maximumDraft}
             min={min}
             max={max}
             step={step}
             inputMode="numeric"
+            onChange={(event) => {
+              setMaximumDraft(event.target.value);
+            }}
+            onBlur={() => {
+              commitMaximumValue(maximumDraft);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                commitMaximumValue(maximumDraft);
+              }
+            }}
+            aria-label="Indtast maksimum pris"
           />
         </div>
       </div>
