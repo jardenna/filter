@@ -1,5 +1,44 @@
+import DynamicFilter from '../components/filter/DynamicFilter';
 import PriceFilter from '../components/filter/PriceFilter';
 import useSearchParamsState from '../hooks/useSearchParamsState';
+export type DynamicSecondaryOptionType = {
+  labelText: string;
+  value: string;
+};
+
+export type DynamicPrimaryOptionType = {
+  labelText: string;
+  secondaryOptions: readonly DynamicSecondaryOptionType[];
+  value: string;
+};
+
+export const dynamicFilterOptions: readonly DynamicPrimaryOptionType[] = [
+  {
+    value: 'createdAt',
+    labelText: 'Created at',
+    secondaryOptions: [
+      { value: 'before', labelText: 'Before' },
+      { value: 'after', labelText: 'After' },
+      { value: 'between', labelText: 'Between' },
+    ],
+  },
+  {
+    value: 'status',
+    labelText: 'Status',
+    secondaryOptions: [
+      { value: 'is', labelText: 'Is' },
+      { value: 'isNot', labelText: 'Is not' },
+    ],
+  },
+  {
+    value: 'amount',
+    labelText: 'Amount',
+    secondaryOptions: [
+      { value: 'gt', labelText: 'Greater than' },
+      { value: 'lt', labelText: 'Less than' },
+    ],
+  },
+];
 
 const ParamsPage = () => {
   const { values, setValue, toggleValue } = useSearchParamsState({
@@ -66,6 +105,13 @@ const ParamsPage = () => {
         }}
         min={0}
         max={10000}
+      />
+      <DynamicFilter
+        options={dynamicFilterOptions}
+        selectedValues={values.features}
+        onToggleSelected={(value) => {
+          toggleValue('features', value);
+        }}
       />
 
       <button type="submit">Search</button>
