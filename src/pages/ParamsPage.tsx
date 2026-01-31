@@ -41,7 +41,14 @@ export const dynamicFilterOptions: readonly DynamicPrimaryOptionType[] = [
 ];
 
 const ParamsPage = () => {
-  const { values, setValue, toggleValue } = useSearchParamsState({
+  const {
+    values,
+    setValue,
+    toggleValue,
+    getRawValue,
+    setRawValue,
+    updateSearchParams,
+  } = useSearchParamsState({
     query: '',
     cat: 'all',
     features: ['apple'],
@@ -54,6 +61,22 @@ const ParamsPage = () => {
     { label: 'orange', value: 'orange' },
     { label: 'apple', value: 'apple' },
   ];
+  const handleRemoveDynamicFilter = (value: string) => {
+    updateSearchParams((params) => {
+      // Remove from features
+      const featureValues = params
+        .getAll('features')
+        .filter((feature) => feature !== value);
+      params.delete('features');
+      featureValues.forEach((feature) => {
+        params.append('features', feature);
+      });
+
+      // Remove raw keys
+      params.delete(`${value}Op`);
+      params.delete(`${value}Val`);
+    });
+  };
 
   return (
     <form
@@ -78,7 +101,6 @@ const ParamsPage = () => {
         <option value="fruit">Fruit</option>
         <option value="vegetable">Vegetable</option>
       </select>
-
       {checkboxItems.map(({ label, value }) => (
         <div key={value}>
           <input
@@ -92,7 +114,6 @@ const ParamsPage = () => {
           <label htmlFor={value}>{label}</label>
         </div>
       ))}
-
       <PriceFilter
         key={`${values.minPrice}-${values.maxPrice}`}
         minPrice={values.minPrice}
@@ -109,11 +130,13 @@ const ParamsPage = () => {
       <DynamicFilter
         options={dynamicFilterOptions}
         selectedValues={values.features}
-        onToggleSelected={(value) => {
+        onSelect={(value) => {
           toggleValue('features', value);
         }}
+        onRemove={handleRemoveDynamicFilter}
+        getRawValue={getRawValue}
+        setRawValue={setRawValue}
       />
-
       <button type="submit">Search</button>
     </form>
   );

@@ -11,48 +11,44 @@ export type PrimaryOptionType = {
   value: string;
 };
 
-type FeatureStateType = Record<
-  string,
-  {
-    inputValue: string;
-    secondaryValue: string;
-  }
->;
-
 type DynamicFilterProps = {
   options: readonly PrimaryOptionType[];
   selectedValues: string[];
-  onToggleSelected: (value: string) => void;
+
+  getRawValue: (key: string) => string | string[] | null;
+  onRemove: (value: string) => void;
+
+  onSelect: (value: string) => void;
+  setRawValue: (key: string, value: string | string[]) => void;
 };
 
-const getDefaultSecondaryValue = (primaryOption: PrimaryOptionType) =>
-  primaryOption.secondaryOptions[0]?.value ?? '';
+const buildSecondaryKey = (primaryValue: string) => `${primaryValue}Op`;
+const buildInputKey = (primaryValue: string) => `${primaryValue}Val`;
 
-const getOrCreateState = (
-  previousState: FeatureStateType,
-  primaryOption: PrimaryOptionType,
-): FeatureStateType[string] => {
-  const existingState = previousState[primaryOption.value];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (existingState) {
-    return existingState;
+const getStringOrFallback = (
+  value: string | string[] | null,
+  fallback: string,
+) => {
+  if (!value) {
+    return fallback;
   }
-
-  return {
-    secondaryValue: getDefaultSecondaryValue(primaryOption),
-    inputValue: '',
-  };
+  if (Array.isArray(value)) {
+    return value[0] ?? fallback;
+  }
+  return value;
 };
 
 export default function DynamicFilter({
-  selectedValues,
   options,
-  onToggleSelected,
+  selectedValues,
+  onSelect,
+  onRemove,
+  getRawValue,
+  setRawValue,
 }: DynamicFilterProps) {
   const baseId = useId();
 
   const [pickerValue, setPickerValue] = useState<string>('none');
-  const [featureState, setFeatureState] = useState<FeatureStateType>({});
 
   const optionsMap = useMemo(
     () => new Map(options.map((optionItem) => [optionItem.value, optionItem])),
@@ -73,45 +69,22 @@ export default function DynamicFilter({
       return;
     }
 
-    onToggleSelected(nextValue);
+    const optionItem = optionsMap.get(nextValue);
+    if (!optionItem) {
+      setPickerValue('none');
+      return;
+    }
+
+    const secondaryKey = buildSecondaryKey(nextValue);
+    const inputKey = buildInputKey(nextValue);
+
+    const defaultSecondaryValue = optionItem.secondaryOptions[0]?.value ?? '';
+
+    setRawValue(secondaryKey, defaultSecondaryValue);
+    setRawValue(inputKey, '');
+
+    onSelect(nextValue);
     setPickerValue('none');
-  };
-
-  const handleRemoveClicked = (valueToRemove: string) => {
-    onToggleSelected(valueToRemove);
-  };
-
-  const handleSecondaryChanged = (
-    primaryValue: string,
-    secondaryValue: string,
-  ) => {
-    const optionItem = optionsMap.get(primaryValue);
-    if (!optionItem) {
-      return;
-    }
-
-    setFeatureState((previousState) => ({
-      ...previousState,
-      [primaryValue]: {
-        ...getOrCreateState(previousState, optionItem),
-        secondaryValue,
-      },
-    }));
-  };
-
-  const handleInputChanged = (primaryValue: string, inputValue: string) => {
-    const optionItem = optionsMap.get(primaryValue);
-    if (!optionItem) {
-      return;
-    }
-
-    setFeatureState((previousState) => ({
-      ...previousState,
-      [primaryValue]: {
-        ...getOrCreateState(previousState, optionItem),
-        inputValue,
-      },
-    }));
   };
 
   const pickerId = `${baseId}-picker`;
@@ -142,7 +115,21 @@ export default function DynamicFilter({
               return null;
             }
 
-            const itemState = getOrCreateState(featureState, optionItem);
+            const secondaryKey = buildSecondaryKey(selectedValue);
+            const inputKey = buildInputKey(selectedValue);
+
+            const defaultSecondaryValue =
+              optionItem.secondaryOptions[0]?.value ?? '';
+
+            const selectedSecondaryValue = getStringOrFallback(
+              getRawValue(secondaryKey),
+              defaultSecondaryValue,
+            );
+
+            const selectedInputValue = getStringOrFallback(
+              getRawValue(inputKey),
+              '',
+            );
 
             const fieldsetId = `${baseId}-fieldset-${selectedValue}`;
             const legendId = `${fieldsetId}-legend`;
@@ -157,9 +144,9 @@ export default function DynamicFilter({
                   <label htmlFor={secondaryId}>Type</label>
                   <select
                     id={secondaryId}
-                    value={itemState.secondaryValue}
+                    value={selectedSecondaryValue}
                     onChange={(event) => {
-                      handleSecondaryChanged(selectedValue, event.target.value);
+                      setRawValue(secondaryKey, event.target.value);
                     }}
                   >
                     {optionItem.secondaryOptions.map((secondaryOption) => (
@@ -178,9 +165,9 @@ export default function DynamicFilter({
                   <input
                     id={inputId}
                     type="text"
-                    value={itemState.inputValue}
+                    value={selectedInputValue}
                     onChange={(event) => {
-                      handleInputChanged(selectedValue, event.target.value);
+                      setRawValue(inputKey, event.target.value);
                     }}
                     autoComplete="off"
                   />
@@ -189,7 +176,7 @@ export default function DynamicFilter({
                 <button
                   type="button"
                   onClick={() => {
-                    handleRemoveClicked(selectedValue);
+                    onRemove(selectedValue);
                   }}
                 >
                   Remove

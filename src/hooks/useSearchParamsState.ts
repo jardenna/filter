@@ -55,7 +55,48 @@ const useSearchParamsState = <T extends SearchParamState>(defaults: T) => {
     setSearchParams(updatedSearchParams);
   };
 
-  return { values, setValue, toggleValue };
+  /* ----------------------------- Raw API ----------------------------- */
+
+  const getRawValue = (key: string): string | string[] | null => {
+    const values = searchParams.getAll(key);
+
+    if (values.length === 0) {
+      return null;
+    }
+
+    return values.length === 1 ? values[0] : values;
+  };
+
+  const setRawValue = (key: string, value: string | string[]) => {
+    const updatedSearchParams = new URLSearchParams(searchParams.toString());
+    updatedSearchParams.delete(key);
+
+    const values = isArray(value) ? value : [value];
+    values.forEach((val) => {
+      if (val.length > 0) {
+        updatedSearchParams.append(key, val);
+      }
+    });
+
+    setSearchParams(updatedSearchParams);
+  };
+
+  const updateSearchParams = (updater: (params: URLSearchParams) => void) => {
+    const updatedSearchParams = new URLSearchParams(searchParams.toString());
+    updater(updatedSearchParams);
+    setSearchParams(updatedSearchParams);
+  };
+
+  return {
+    values,
+    setValue,
+    toggleValue,
+
+    // Raw API
+    getRawValue,
+    setRawValue,
+    updateSearchParams,
+  };
 };
 
 export default useSearchParamsState;
