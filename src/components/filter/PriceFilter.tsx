@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import useDebounce from '../../hooks/useDebounce';
+import { type ChangeInputType } from '../../types';
 import './_filter.scss';
 
 interface PriceFilterProps {
@@ -92,7 +93,7 @@ const PriceFilter = ({
     });
   };
 
-  const handleRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRangeChange = (event: ChangeInputType) => {
     const inputName = event.target.name;
     const inputValue = Number(event.target.value);
 
