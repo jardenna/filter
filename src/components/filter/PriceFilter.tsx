@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useId, useState } from 'react';
+import useDebounce from '../../hooks/useDebounce';
+import { type ChangeInputType } from '../../types';
 import './_filter.scss';
 
 interface PriceFilterProps {
@@ -7,127 +9,232 @@ interface PriceFilterProps {
   debounceMs?: number;
   max?: number;
   min?: number;
+  step?: number;
   onMaxChange: (value: string) => void;
   onMinChange: (value: string) => void;
 }
+
+const clampNumberToRange = (
+  value: number,
+  lowerBound: number,
+  upperBound: number,
+) => Math.min(upperBound, Math.max(lowerBound, value));
+
+const parseFiniteNumberOrNull = (rawValue: string) => {
+  if (rawValue.trim() === '') {
+    return null;
+  }
+
+  const parsedValue = Number(rawValue);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+};
 
 const PriceFilter = ({
   minPrice,
   maxPrice,
   onMinChange,
   onMaxChange,
+  step = 100,
   min = 0,
   max = 10000,
-  debounceMs = 500,
 }: PriceFilterProps) => {
-  const [localMin, setLocalMin] = useState(minPrice);
-  const [localMax, setLocalMax] = useState(maxPrice);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const describedById = useId();
+  const { debounce } = useDebounce();
 
-  useEffect(() => {
-    setLocalMin(minPrice);
-    setLocalMax(maxPrice);
-  }, [minPrice, maxPrice]);
+  // Canonical numeric values (used by range inputs + output)
+  const [minimumValue, setMinimumValue] = useState(() =>
+    clampNumberToRange(Number(minPrice || min), min, max),
+  );
+  const [maximumValue, setMaximumValue] = useState(() =>
+    clampNumberToRange(Number(maxPrice || max), min, max),
+  );
 
-  const debounceUpdate = (updateFn: (value: string) => void, value: string) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+  // Draft values for typing (used by number inputs)
+  const [minimumDraft, setMinimumDraft] = useState(() =>
+    String(clampNumberToRange(Number(minPrice || min), min, max)),
+  );
+  const [maximumDraft, setMaximumDraft] = useState(() =>
+    String(clampNumberToRange(Number(maxPrice || max), min, max)),
+  );
+
+  const commitMinimumValue = (rawValue: string) => {
+    const parsedValue = parseFiniteNumberOrNull(rawValue);
+
+    if (parsedValue === null) {
+      setMinimumDraft(String(minimumValue));
+      return;
     }
-    debounceTimerRef.current = setTimeout(() => {
-      updateFn(value);
-    }, debounceMs);
+
+    const committedValue = clampNumberToRange(parsedValue, min, maximumValue);
+
+    setMinimumValue(committedValue);
+    setMinimumDraft(String(committedValue));
+
+    debounce(() => {
+      onMinChange(String(committedValue));
+    });
   };
 
-  const handleSliderMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const numValue = Number(value);
-    if (numValue <= Number(localMax)) {
-      setLocalMin(value);
-      debounceUpdate(onMinChange, value);
+  const commitMaximumValue = (rawValue: string) => {
+    const parsedValue = parseFiniteNumberOrNull(rawValue);
+
+    if (parsedValue === null) {
+      setMaximumDraft(String(maximumValue));
+      return;
+    }
+
+    const committedValue = clampNumberToRange(parsedValue, minimumValue, max);
+
+    setMaximumValue(committedValue);
+    setMaximumDraft(String(committedValue));
+
+    debounce(() => {
+      onMaxChange(String(committedValue));
+    });
+  };
+
+  const handleRangeChange = (event: ChangeInputType) => {
+    const inputName = event.target.name;
+    const inputValue = Number(event.target.value);
+
+    if (!Number.isFinite(inputValue)) {
+      return;
+    }
+
+    if (inputName === 'min') {
+      const committedValue = clampNumberToRange(inputValue, min, maximumValue);
+
+      setMinimumValue(committedValue);
+      setMinimumDraft(String(committedValue));
+
+      debounce(() => {
+        onMinChange(String(committedValue));
+      });
+      return;
+    }
+
+    if (inputName === 'max') {
+      const committedValue = clampNumberToRange(inputValue, minimumValue, max);
+
+      setMaximumValue(committedValue);
+      setMaximumDraft(String(committedValue));
+
+      debounce(() => {
+        onMaxChange(String(committedValue));
+      });
     }
   };
 
-  const handleSliderMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const numValue = Number(value);
-    if (numValue >= Number(localMin)) {
-      setLocalMax(value);
-      debounceUpdate(onMaxChange, value);
-    }
-  };
-
-  const handleInputMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocalMin(value);
-    if (value === '' || !isNaN(Number(value))) {
-      debounceUpdate(onMinChange, value);
-    }
-  };
-
-  const handleInputMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocalMax(value);
-    if (value === '' || !isNaN(Number(value))) {
-      debounceUpdate(onMaxChange, value);
-    }
-  };
+  const leftPercent = ((minimumValue - min) / (max - min)) * 100;
+  const widthPercent = ((maximumValue - minimumValue) / (max - min)) * 100;
 
   return (
-    <div className="price-filter">
-      <h3>Pris</h3>
+    <fieldset className="price-filter" aria-describedby={describedById}>
+      <legend>Pris</legend>
 
       <div className="price-slider-container">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          value={localMin || min}
-          onChange={handleSliderMinChange}
-          className="price-slider price-slider--min"
+        <div className="slider-track-bg" />
+        <div
+          className="slider-track-filled"
+          style={{
+            left: `${leftPercent}%`,
+            width: `${widthPercent}%`,
+          }}
         />
+
         <input
           type="range"
+          name="min"
+          id="min"
           min={min}
           max={max}
-          value={localMax || max}
-          onChange={handleSliderMaxChange}
-          className="price-slider price-slider--max"
+          step={step}
+          value={minimumValue}
+          onChange={handleRangeChange}
+          className="price-slider"
+          aria-label="Minimum pris"
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={minimumValue}
+          aria-valuetext={`${minimumValue} kroner`}
+        />
+
+        <input
+          type="range"
+          name="max"
+          id="max"
+          min={min}
+          max={max}
+          step={step}
+          value={maximumValue}
+          onChange={handleRangeChange}
+          className="price-slider"
+          aria-label="Maksimum pris"
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={maximumValue}
+          aria-valuetext={`${maximumValue} kroner`}
         />
       </div>
 
-      <div className="price-display">
-        <span>
-          {localMin || min} kr - {localMax || max} kr
-        </span>
-      </div>
+      <output id={describedById} className="price-display" aria-live="polite">
+        {minimumValue} kr - {maximumValue} kr
+      </output>
 
       <div className="price-inputs">
         <div className="price-input-group">
           <label htmlFor="minPrice">Min pris</label>
           <input
             id="minPrice"
+            name="minPrice"
             type="number"
-            value={localMin}
-            onChange={handleInputMinChange}
-            placeholder="0"
+            value={minimumDraft}
             min={min}
             max={max}
+            step={step}
+            inputMode="numeric"
+            onChange={(event) => {
+              setMinimumDraft(event.target.value);
+            }}
+            onBlur={() => {
+              commitMinimumValue(minimumDraft);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                commitMinimumValue(minimumDraft);
+              }
+            }}
+            aria-label="Indtast minimum pris"
           />
         </div>
+
         <div className="price-input-group">
           <label htmlFor="maxPrice">Max pris</label>
           <input
             id="maxPrice"
+            name="maxPrice"
             type="number"
-            value={localMax}
-            onChange={handleInputMaxChange}
-            placeholder={max.toString()}
+            value={maximumDraft}
             min={min}
             max={max}
+            step={step}
+            inputMode="numeric"
+            onChange={(event) => {
+              setMaximumDraft(event.target.value);
+            }}
+            onBlur={() => {
+              commitMaximumValue(maximumDraft);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                commitMaximumValue(maximumDraft);
+              }
+            }}
+            aria-label="Indtast maksimum pris"
           />
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 };
 

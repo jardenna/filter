@@ -1,20 +1,120 @@
-.filter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+$blue: #007bff;
+$blue-dark: #0056b3;
+$track-bg: #e0e0e0;
+$thumb-size: 24px;
+$thumb-border: 3px;
+$shadow: 0 2px 8px rgb(0 0 0 / 20%);
+$shadow-hover: 0 4px 12px rgb(0 0 0 / 30%);
+$focus-ring: 0 0 0 3px rgb(0 123 255 / 25%);
+
+@mixin thumb-base {
+  width: $thumb-size;
+  height: $thumb-size;
+  background-color: #fff;
+  border: $thumb-border solid $blue;
+  border-radius: 50%;
+  cursor: grab;
+  pointer-events: auto;
+  box-shadow: $shadow;
+  transition: all 0.2s ease;
 }
 
-.input-container {
-  display: flex;
-  flex-direction: column;
-  min-width: 400px;
+@mixin thumb-hover {
+  background-color: #f8f9fa;
+  transform: scale(1.2);
+  box-shadow: $shadow-hover;
+}
 
-  input {
-    padding: 12px;
+@mixin thumb-active {
+  cursor: grabbing;
+  background-color: $blue;
+  transform: scale(1.1);
+}
+
+@mixin thumb-focus {
+  outline: 3px solid $blue;
+  outline-offset: 3px;
+  box-shadow: $focus-ring;
+}
+
+.price-slider-container {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.slider-track-bg,
+.slider-track-filled {
+  position: absolute;
+  height: 8px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.slider-track-bg {
+  width: 100%;
+  background-color: $track-bg;
+}
+
+.slider-track-filled {
+  background: linear-gradient(90deg, $blue-dark, $blue);
+}
+
+.price-slider {
+  position: absolute;
+  width: 100%;
+  appearance: none;
+  background-color: transparent;
+  pointer-events: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+
+  &::-webkit-slider-track,
+  &::-moz-range-track {
+    background-color: transparent;
+    border: none;
+    height: 0;
   }
 
-  label {
-    margin-bottom: 4px;
+  &::-webkit-slider-thumb {
+    appearance: none;
+
+    @include thumb-base;
+  }
+
+  &::-moz-range-thumb {
+    @include thumb-base;
+  }
+
+  &:focus-visible {
+    &::-webkit-slider-thumb {
+      @include thumb-focus;
+    }
+
+    &::-moz-range-thumb {
+      @include thumb-focus;
+    }
+  }
+
+  &:active {
+    &::-webkit-slider-thumb {
+      @include thumb-active;
+    }
+
+    &::-moz-range-thumb {
+      @include thumb-active;
+    }
+  }
+
+  &::-webkit-slider-thumb:hover {
+    @include thumb-hover;
+  }
+
+  &::-moz-range-thumb:hover {
+    @include thumb-hover;
   }
 }
